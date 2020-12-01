@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BinaryKnapsack.Metaheuristics.Solution" Collapsed="true">
+    <Position X="6.75" Y="1.5" Width="1.5" />
+    <AssociationLine Name="_myContainer" Type="BinaryKnapsack.Metaheuristics.Metaheuristic">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.093" Y="0.268" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAgAAAgAAAAAAAkAAAAAgAAAAIAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Metaheuristics\Solution.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_myContainer" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="BinaryKnapsack.Metaheuristics.Metaheuristic" Collapsed="true">
+    <Position X="3.25" Y="1.5" Width="1.5" />
+    <AssociationLine Name="MyBestSolution" Type="BinaryKnapsack.Metaheuristics.Solution">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.101" Y="-0.524" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAQAAAAAAAQAAAQAAgAAgAAAAAAEAAA=</HashCode>
+      <FileName>Metaheuristics\Metaheuristic.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyBestSolution" />
+      <Property Name="MyKnapsack" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="BinaryKnapsack.Metaheuristics.SimpleState.HillClimbing" Collapsed="true">
+    <Position X="3.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Metaheuristics\SimpleState\HillClimbing.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinaryKnapsack.Problems.Knapsack" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAASAAEAAAAAgACACQAAAEAAAAgAABAAAA=</HashCode>
+      <FileName>Problems\Knapsack.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinaryKnapsack.Problems.Item" Collapsed="true">
+    <Position X="0.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAkAAAAAAABACAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Problems\Item.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
