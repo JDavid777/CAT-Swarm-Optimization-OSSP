@@ -7,11 +7,17 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 {
     public class CSO: Metaheuristic
     {
-        public int SMP = 50; //Seeking Memory Pool
-        public int SDR; //Seeking range
+        public int SwarmSize = 50;
+        public int SMP; //Seeking Memory Pool
+        public int SRD; //Seeking range
         public int CDC; //counts of dimension to change
         public bool SPC; //Self-position considerate
+        
 
+        public const double C = 1;
+        public double MR = 0.4;
+        public int NumberSM => (int)(MR * SwarmSize);
+        public int CountSM = 0;
 
         /*public double W = 1; // alpha - momentum
         public double C1 = 1; // beta - cognitive component
@@ -25,30 +31,111 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
         public override void Execute(TSP theTsp, Random theAleatory)
         {
-            /*
-             Step1: Make j copies of the present position of catk, where j = SMP. 
-            If the value of SPC is true, let j = (SMP-1), 
-            then retain the present position as one of the candidates. 
-            Step2: For each copy, according to CDC, randomly plus or minus SRD percents 
-            of the present values and replace the old ones. 
-            Step3: Calculate the fitness values (FS) of all candidate points. 
+            MyTsp = theTsp;
+            MyAleatory = theAleatory;
+            CurrentEFOs = 0;
+            Curve = new List<double>();
+
+            var swarm = new List<Cat>();
+            for (var i = 0; i < SwarmSize; i++)
+            {
+                var newCat = new Cat(this);
+                newCat.RandomInitialization();
+                newCat.SMFlag = DistributeCats();
+                swarm.Add(newCat);
+                if (Math.Abs(newCat.Fitness - MyTsp.OptimalKnown) < 1e-10)
+                    break;
+            }
+
+            var maxFitness = swarm.Min(x => x.Fitness);
+            var best = swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
+            MyBestSolution = new Cat(best);
+
+            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyTsp.OptimalKnown) > 1e-10)
+            {
+                for (var i = 0; i < SwarmSize; i++)
+                {
+                    if (swarm[i].SMFlag)
+                        swarm[i] = SeekingMode(swarm[i]);
+                    else
+                        swarm[i] = TracingMode(swarm[i]);
+                }
+            }
+            
+
+        }
+        public bool DistributeCats()
+        {
+            bool flag = false;
+            if (CountSM < NumberSM)
+            {
+                flag = true;
+                CountSM++;
+            }
+            return flag;
+        }
+        public Cat SeekingMode(Cat cat)
+        {
+
+            var clones = new List<Cat>();
+            /*Step1: Make j copies of the present position of catk, where j = SMP. 
+            If the value of SPC is true, let j = (SMP-1) then retain the present position as one of the candidates.*/ 
+            
+            //Se preserva el actual en la última posición
+            for (var i = 0; i < SMP; i++)
+            {
+                clones.Add(new Cat(cat));
+            }
+
+            /* Step2: For each copy, according to CDC, randomly plus or minus SRD percents 
+            of the present values and replace the old ones. */
+            var size = MyTsp.TotalNodes;
+            var sum = CDC + SRD;
+            for (var i = 0; i < (SPC ? SMP - 1 : SMP); i++)
+            {
+                if (sum == size)
+                {
+                    var index = SRD - 1;
+                    for (var j = CDC; j > SRD; j--)
+                    {
+                        var aux = cat.Tour[j];
+                        cat.Tour[j] = cat.Tour[index];
+                        cat.Tour[index] = aux;
+                        index++;
+                    }
+                }
+                else
+                {
+                    var first = cat.Tour[SRD - 1];
+
+                    if (sum < size)
+                    {
+                        cat.Tour[SRD - 1] = cat.Tour[sum];
+                        cat.Tour[sum] = first;
+                    }
+                    else
+                    {
+                        cat.Tour[SRD - 1] = cat.Tour[sum - (size + 1)];
+                        cat.Tour[sum - (size + 1)] = first;
+                    }
+                }
+                
+                clones.Add(new Cat(cat));
+            }
+            
+            /*Step3: Calculate the fitness values (FS) of all candidate points. 
             Step4: If all FS are not exactly equal, calculate the selecting probability 
             of each candidate point by equation (1), 
             otherwise set all the selecting probability of each candidate point be 1. 
             Step5: Randomly pick the point to move to from the candidate points, and replace the position of catk
              */
-
+            return null;
         }
-
-        public void SeekingMode()
-        {
-            //TODO
-            //RULETA
-        }
-        public void TracingMode()
+        public Cat TracingMode(Cat cat)
         {
             //TODO
             //VELOCIDADES = PSO (OSSP)
+            return null;
         }
 
         /*public override void Execute(TSP theTsp, Random theAleatory)

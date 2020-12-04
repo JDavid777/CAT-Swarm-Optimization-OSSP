@@ -5,18 +5,17 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
     public class Cat:Solution
     {
         public double[] Velocity;
-        public int[] Position;
         public int[] BestPosition;
         public double BestFitness;
-        public bool Flag;
+        public bool SMFlag;
 
-        public PSOSolution(Algorithm dueño) : base(dueño)
+        public Cat(Algorithm dueño) : base(dueño)
         {
             Velocity = new double[MyContainer.MyTsp.TotalNodes];
             BestPosition = new int[MyContainer.MyTsp.TotalNodes];
         }
 
-        public PSOSolution(PSOSolution original) : base(original)
+        public Cat(Cat original) : base(original)
         {
             Velocity = new double[MyContainer.MyTsp.TotalNodes];
             for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
@@ -25,6 +24,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
                 BestPosition[d] = original.BestPosition[d];
             BestFitness = original.BestFitness;
+            SMFlag = original.SMFlag;
         }
 
         public new void RandomInitialization()
@@ -40,19 +40,21 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             Velocity = new double[MyContainer.MyTsp.TotalNodes];
             for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
                 Velocity[d] = -4 + 8 * MyContainer.MyAleatory.NextDouble();
+
+
         }
 
-        public void UpdateVelocity(PSOSolution best)
+        public void UpdateVelocity()
         {
             for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
             {
-                var w = MyContainer.MyAleatory.NextDouble() * ((PSO) MyContainer).W;
-                var c1 = MyContainer.MyAleatory.NextDouble() * ((PSO) MyContainer).C1;
-                var c2 = MyContainer.MyAleatory.NextDouble() * ((PSO) MyContainer).C2;
+                var r1 = MyContainer.MyAleatory.NextDouble();
+                var c = CSO.C;
 
-                Velocity[d] = w * Velocity[d] +
-                              c1* (BestPosition[d] - Tour[d]) +
-                              c2 * (best.Tour[d] - Tour[d]);
+
+                Velocity[d] = Velocity[d] +
+                              r1 * c * 
+                              (BestPosition[d] - Tour[d]);
 
                 if (Velocity[d] < -4) Velocity[d] = -4;
                 if (Velocity[d] > 4) Velocity[d] = 4;
@@ -63,14 +65,20 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         {
             //--
 
-            Evaluate();
+            //Evaluate();
 
-            if (Fitness > BestFitness)
+            /*if (Fitness > BestFitness)
             {
                 for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
                     BestPosition[d] = Tour[d];
                 BestFitness = Fitness;
-            }
+            }*/
+
+            for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
+                Tour[d] = Tour[d] + (int) Velocity[d];
+
+            Evaluate();
+
         }
 
         public void Repare(List<int> selected, ref double myWeight)
