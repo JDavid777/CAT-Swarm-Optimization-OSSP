@@ -12,7 +12,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         public int SRD; //Seeking range
         public int CDC; //counts of dimension to change
         public bool SPC; //Self-position considerate
-        
+        public List<Cat> Swarm;
 
         public const double C = 1;
         public double MR = 0.4;
@@ -27,6 +27,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         public CSO(int maxEFOs)
         {
             MaxEFOs = maxEFOs;
+            Swarm = new List<Cat>();
         }
 
         public override void Execute(TSP theTsp, Random theAleatory)
@@ -36,29 +37,29 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             CurrentEFOs = 0;
             Curve = new List<double>();
 
-            var swarm = new List<Cat>();
+            
             for (var i = 0; i < SwarmSize; i++)
             {
                 var newCat = new Cat(this);
                 newCat.RandomInitialization();
                 newCat.SMFlag = DistributeCats();
-                swarm.Add(newCat);
+                Swarm.Add(newCat);
                 if (Math.Abs(newCat.Fitness - MyTsp.OptimalKnown) < 1e-10)
                     break;
             }
 
-            var maxFitness = swarm.Min(x => x.Fitness);
-            var best = swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
+            var maxFitness = Swarm.Min(x => x.Fitness);
+            var best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
             MyBestSolution = new Cat(best);
 
             while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyTsp.OptimalKnown) > 1e-10)
             {
                 for (var i = 0; i < SwarmSize; i++)
                 {
-                    if (swarm[i].SMFlag)
-                        swarm[i] = SeekingMode(swarm[i]);
+                    if (Swarm[i].SMFlag)
+                        Swarm[i] = new Cat(SeekingMode(Swarm[i]));
                     else
-                        swarm[i] = TracingMode(swarm[i]);
+                        Swarm[i] = new Cat(TracingMode(Swarm[i]));
                 }
             }
             
@@ -78,6 +79,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         {
 
             var clones = new List<Cat>();
+            var probabilites = new List<double>();
             /*Step1: Make j copies of the present position of catk, where j = SMP. 
             If the value of SPC is true, let j = (SMP-1) then retain the present position as one of the candidates.*/ 
             
@@ -122,20 +124,60 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 
                 clones.Add(new Cat(cat));
             }
+
+            /*Step3: Calculate the fitness values (FS) of all candidate points.*/
+            for (int i = 0; i < clones.Count(); i++)
+            {
+                clones[i].Evaluate();
+            }
+
+            /* Step4: If all FS are not exactly equal, calculate the selecting probability 
+            of each candidate point by equation (1), otherwise set all the selecting probability 
+            of each candidate point be 1.*/
+            var max_fitness = Swarm.Max(x => x.Fitness);
+            var min_fitness = Swarm.Min(x => x.Fitness);
+            var probability = 0.0;
+            for (int i = 0; i < clones.Count(); i++)
+            {
+                probability = Math.Abs(clones[i].Fitness - min_fitness) /
+                              (max_fitness - min_fitness);
+                probabilites.Add(probability);
+            }
             
-            /*Step3: Calculate the fitness values (FS) of all candidate points. 
-            Step4: If all FS are not exactly equal, calculate the selecting probability 
-            of each candidate point by equation (1), 
-            otherwise set all the selecting probability of each candidate point be 1. 
-            Step5: Randomly pick the point to move to from the candidate points, and replace the position of catk
-             */
-            return null;
+            /*Step5: Randomly pick the point to move to from the candidate points, and replace the position of catk*/
+            var aleatory = MyAleatory.NextDouble();
+            var chosen = -1;
+            for (int i = 0; i < clones.Count(); i++)
+            {
+                if (probabilites[i] > aleatory)
+                {
+                    chosen = i;
+                    break;
+                }
+                
+            }
+                
+            return clones[chosen];
         }
         public Cat TracingMode(Cat cat)
         {
+            /**
+             * The process of TM is given as:
+            (1)
+            Update the velocities of each catk According to the equation:
+            V′k=w∗Vk+r∗c∗(Xbest−Xk)
+            (2)
+            check if the velocities are of the highest order.
+            (3)
+            update the position of the catk according to equation:
+            X′k=Xk+
+             * **/
+
+            cat.UpdateVelocity();
+            cat.UpdatePosition();
             //TODO
             //VELOCIDADES = PSO (OSSP)
-            return null;
+            return cat;
         }
 
         /*public override void Execute(TSP theTsp, Random theAleatory)
