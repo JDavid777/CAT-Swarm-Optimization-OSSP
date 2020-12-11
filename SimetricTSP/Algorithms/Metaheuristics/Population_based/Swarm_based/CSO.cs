@@ -41,12 +41,13 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             for (var i = 0; i < SwarmSize; i++)
             {
                 var newCat = new Cat(this);
-                newCat.RandomInitialization();
-                newCat.SMFlag = DistributeCats();
+                newCat.RandomInitialization();       
                 Swarm.Add(newCat);
                 if (Math.Abs(newCat.Fitness - MyTsp.OptimalKnown) < 1e-10)
                     break;
             }
+
+            DistributeCats();
 
             var maxFitness = Swarm.Min(x => x.Fitness);
             var best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
@@ -61,19 +62,28 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                     else
                         Swarm[i] = new Cat(TracingMode(Swarm[i]));
                 }
+
+                /*Actualizar el mejor*/
+                maxFitness = Swarm.Min(x => x.Fitness);
+                best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10); //TODO: Recordar
+                if (maxFitness > MyBestSolution.Fitness)
+                    MyBestSolution = new Cat(best);
+
+                /*Redistribuir los gatos*/
+                DistributeCats();
+
             }
             
 
         }
-        public bool DistributeCats()
+        public void DistributeCats()
         {
-            bool flag = false;
-            if (CountSM < NumberSM)
+            for (var i = 0; i < NumberSM; i++)
             {
-                flag = true;
-                CountSM++;
+                int aleatorio = MyAleatory.Next(0, SwarmSize); //Preguntar
+                Swarm[aleatorio].SMFlag = true;
             }
-            return flag;
+            
         }
         public Cat SeekingMode(Cat cat)
         {

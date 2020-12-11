@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 {
@@ -40,13 +41,11 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             Velocity = new double[MyContainer.MyTsp.TotalNodes];
             for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
                 Velocity[d] = -4 + 8 * MyContainer.MyAleatory.NextDouble();
-
-
         }
 
         public void UpdateVelocity()
         {
-            for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
+            /*for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
             {
                 var r1 = MyContainer.MyAleatory.NextDouble();
                 var c = CSO.C;
@@ -58,7 +57,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
                 if (Velocity[d] < -4) Velocity[d] = -4;
                 if (Velocity[d] > 4) Velocity[d] = 4;
-            }
+            }*/
         }
 
         public void UpdatePosition()
