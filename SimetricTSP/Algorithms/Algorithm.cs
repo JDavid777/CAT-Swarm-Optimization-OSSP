@@ -11,10 +11,11 @@ namespace SimetricTSP.Algorithms
 
         public Solution MyBestSolution { get; set; }
 
-        public TSP MyTsp { get; set; }
+        //public TSP MyTsp { get; set; }
+        public OSSP MyOSSP { get; set; }
 
         public Random MyAleatory;
 
-        public abstract void Execute(TSP theTsp, Random theAleatory);
+        public abstract void Execute(OSSP theOSSP, Random theAleatory);
     }
 }

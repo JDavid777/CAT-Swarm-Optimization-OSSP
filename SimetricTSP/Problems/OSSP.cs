@@ -18,6 +18,7 @@ namespace SimetricTSP.Problems
         public int[,] Times;
         public int[,] Machines;
 
+        
         public OSSP(string fileName)
         {
             if (fileName == null) fileName = "OpenShop1_4x4.txt";
@@ -40,7 +41,7 @@ namespace SimetricTSP.Problems
             
             Times = new int[N,N];
             Machines = new int[N,N];
-            InfoMatrix = new int[N, NumOperations]; 
+            InfoMatrix = new int[4, NumOperations]; 
 
             int indexTime = 2;
             int indexMachines = indexTime + N + 1;

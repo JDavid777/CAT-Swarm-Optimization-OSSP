@@ -48,14 +48,10 @@
     <Compile Include="Algorithms\Algorithm.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\GeneticAlgorithms\GA.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\GeneticAlgorithms\Chromosome.cs" />
-    <Compile Include="Algorithms\Metaheuristics\Population_based\HarmonySearchAlgorithms\GBHS.cs" />
-    <Compile Include="Algorithms\Metaheuristics\Population_based\HarmonySearchAlgorithms\Harmony.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\Swarm_based\CSO.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\Swarm_based\PSO.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\Swarm_based\Cat.cs" />
     <Compile Include="Algorithms\Metaheuristics\Population_based\Swarm_based\PSOSolution.cs" />
-    <Compile Include="Algorithms\Metaheuristics\SimpleState\RandomSearch.cs" />
-    <Compile Include="Algorithms\Metaheuristics\SimpleState\HillClimbing.cs" />
     <Compile Include="Algorithms\Metaheuristics\Metaheuristic.cs" />
     <Compile Include="Algorithms\Solution.cs" />
     <Compile Include="Problems\OSSP.cs" />

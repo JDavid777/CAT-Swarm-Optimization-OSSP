@@ -14,9 +14,9 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.GeneticAlgorith
             MaxEFOs = maxEFOs;
         }
 
-        public override void Execute(TSP theTsp, Random theAleatory)
+        public override void Execute(OSSP theOSSP, Random theAleatory)
         {
-            MyTsp = theTsp;
+            MyOSSP = theOSSP;
             MyAleatory = theAleatory;
             CurrentEFOs = 0;
             Curve = new List<double>();
@@ -28,14 +28,14 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.GeneticAlgorith
                 var s = new Chromosome(this);
                 s.RandomInitialization();
                 population.Add(s);
-                if (Math.Abs(s.Fitness - MyTsp.OptimalKnown) < 1e-10)
+                if (Math.Abs(s.Fitness - MyOSSP.OptimalKnown) < 1e-10)
                     break;
             }
 
             population.Sort((x,y) => x.Fitness.CompareTo(y.Fitness));
             Curve.Add(population[0].Fitness);
 
-            while (CurrentEFOs < MaxEFOs && Math.Abs(population[0].Fitness - MyTsp.OptimalKnown) > 1e-10)
+            while (CurrentEFOs < MaxEFOs && Math.Abs(population[0].Fitness - MyOSSP.OptimalKnown) > 1e-10)
             {
                 var alloffspring = new List<Chromosome>();
                 for (var h = 0; h < PopulationSize / 2; h++)

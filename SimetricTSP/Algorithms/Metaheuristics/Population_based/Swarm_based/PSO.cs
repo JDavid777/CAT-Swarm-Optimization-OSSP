@@ -18,9 +18,9 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             MaxEFOs = maxEFOs;
         }
 
-        public override void Execute(TSP theTsp, Random theAleatory)
+        public override void Execute(OSSP theOSSP, Random theAleatory)
         {
-            MyTsp = theTsp;
+            MyOSSP = theOSSP;
             MyAleatory= theAleatory;
             CurrentEFOs = 0;
             Curve = new List<double>();
@@ -31,7 +31,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 var newParticle = new PSOSolution(this);
                 newParticle.RandomInitialization();
                 swarm.Add(newParticle);
-                if (Math.Abs(newParticle.Fitness - MyTsp.OptimalKnown) < 1e-10)
+                if (Math.Abs(newParticle.Fitness - MyOSSP.OptimalKnown) < 1e-10)
                     break;
             }
 
@@ -39,7 +39,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             var best = swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
             MyBestSolution = new PSOSolution(best);
 
-            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyTsp.OptimalKnown) > 1e-10)
+            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyOSSP.OptimalKnown) > 1e-10)
             {
                 for (var i = 0; i < SwarmSize; i++)
                     swarm[i].UpdateVelocity((PSOSolution)MyBestSolution);
@@ -47,7 +47,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 for (var i = 0; i < SwarmSize; i++)
                 {
                     swarm[i].UpdatePosition();
-                    if (Math.Abs(swarm[i].Fitness - MyTsp.OptimalKnown) < 1e-10)
+                    if (Math.Abs(swarm[i].Fitness - MyOSSP.OptimalKnown) < 1e-10)
                         break;
                 }
 

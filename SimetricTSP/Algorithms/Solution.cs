@@ -5,54 +5,64 @@ namespace SimetricTSP.Algorithms
 {
     public class Solution
     {
-        public int[] Tour;
+        public int[] Position;
         public double Fitness;
         public Algorithm MyContainer;
 
         public Solution(Algorithm theOwner)
         {
             MyContainer = theOwner;
-            Tour = new int[MyContainer.MyTsp.TotalNodes];
+            Position = new int[MyContainer.MyOSSP.NumOperations];
         }
 
         public Solution(Solution original)
         {
             MyContainer = original.MyContainer;
 
-            Tour = new int[MyContainer.MyTsp.TotalNodes];
-            for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
-                Tour[d] = original.Tour[d];
+            Position = new int[MyContainer.MyOSSP.NumOperations];
+            for (var d = 0; d < MyContainer.MyOSSP.NumOperations; d++)
+                Position[d] = original.Position[d];
             Fitness = original.Fitness;
         }
 
         // Random Initialization using the new methods for Tweak
         public void RandomInitialization()
         {
-            var availableCities = new List<int>();
-            for (var i = 1; i < MyContainer.MyTsp.TotalNodes; i++) availableCities.Add(i);
+            //Initialize position
+            var aleatories = new List<int>();
+            var aleatory = -1;
+            for (var i = 0; i < MyContainer.MyOSSP.NumOperations; i++)
+            { 
+                while (aleatories.Contains(aleatory))
+                    aleatory = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations) + 1;
 
-            var posTour = 0;
-            Tour[posTour++] = 0; // Initial city
+                aleatories.Add(aleatory);
+                Position[i] = aleatory;
+            }
+                 
+            /*var posTour = 0;
+            Position[posTour++] = 0; // Initial city
             while (availableCities.Count > 0)
             {
                 var pos = MyContainer.MyAleatory.Next(availableCities.Count);
-                Tour[posTour++] = availableCities[pos];
+                Position[posTour++] = availableCities[pos];
+                
                 availableCities.RemoveAt(pos);
-            }
+            }*/
 
             Evaluate();
         }
         
         public void Tweak()
         {
-            var pos1 = MyContainer.MyAleatory.Next(MyContainer.MyTsp.TotalNodes - 1) + 1;
+            var pos1 = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations);
             var pos2 = pos1;
             while (pos2 == pos1)
-                pos2 = MyContainer.MyAleatory.Next(MyContainer.MyTsp.TotalNodes - 1) + 1;
+                pos2 = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations);
 
-            var temp = Tour[pos1];
-            Tour[pos1] = Tour[pos2];
-            Tour[pos2] = temp;
+            var temp = Position[pos1];
+            Position[pos1] = Position[pos2];
+            Position[pos2] = temp;
 
             Evaluate();
         }
@@ -65,47 +75,47 @@ namespace SimetricTSP.Algorithms
             var positions = new List<int>();
             while (positions.Count < 2)
             {
-                var newCity = MyContainer.MyAleatory.Next(MyContainer.MyTsp.TotalNodes - 1) + 1;
-                if (!positions.Exists(x => x == newCity))
-                    positions.Add(newCity);
+                var newOperation = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations);
+                if (!positions.Exists(x => x == newOperation))
+                    positions.Add(newOperation);
             }
             positions.Sort((x,y)=> x.CompareTo(y));
 
             var movements = ((positions[1] - positions[0]) / 2) + 1; 
             for (var i = 0; i < movements; i++)
             {
-                var temp = Tour[positions[0] + i];
-                Tour[positions[0] + i] = Tour[positions[1] - i];
-                Tour[positions[1] - i] = temp;
+                var temp = Position[positions[0] + i];
+                Position[positions[0] + i] = Position[positions[1] - i];
+                Position[positions[1] - i] = temp;
             }
             Evaluate();
         }
 
-        public bool IsFeasible()
+        /*public bool IsFeasible()
         {
             for (var i = 0; i < MyContainer.MyTsp.TotalNodes; i++)
                 for (var j = i+1; j < MyContainer.MyTsp.TotalNodes; j++)
-                    if (Tour[i] == Tour[j])
+                    if (Position[i] == Position[j])
                         return false;
             return true;
-        }
+        }*/
 
         public void Evaluate()
         {
             MyContainer.CurrentEFOs++;
 
-            if (!IsFeasible())
+            /*if (!IsFeasible())
                 Fitness = double.PositiveInfinity;
-            else
-                Fitness = MyContainer.MyTsp.Evaluate(Tour);
+            else*/
+            Fitness = MyContainer.MyOSSP.Evaluate(Position);
         }
 
         public override string ToString()
         {
             var result = "P [ ";
-            for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
+            for (var d = 0; d < MyContainer.MyOSSP.NumOperations; d++)
             {
-                result += Tour[d] + " ";
+                result += Position[d] + " ";
             }
             result += "] F [" + Fitness + " ]";
             return result;

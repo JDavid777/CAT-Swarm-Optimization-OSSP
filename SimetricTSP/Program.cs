@@ -15,33 +15,8 @@ namespace BinaryKnapsack
         static void Main()
         {
             OSSP newTest = new OSSP("OpenShop8_10x10.txt");
-            for (int i = 0; i < newTest.N; i++)
-            {
-                for (int j = 0; j < newTest.N; j++)
-                {
-                    Console.Write(newTest.Times[i,j] + " ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            for (int i = 0; i < newTest.N; i++)
-            {
-                for (int j = 0; j < newTest.N; j++)
-                {
-                    Console.Write(newTest.Machines[i,j] + " ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            for (int i = 0; i < newTest.N; i++)
-            {
-                for (int j = 0; j < newTest.NumOperations; j++)
-                {
-                    Console.Write(newTest.InfoMatrix[i, j] + " ");
-                }
-                Console.WriteLine();
-            }
             Console.ReadKey();
+
             //var myExhaustiveTest = new ExhaustiveTest();
             //myExhaustiveTest.Execute();
 

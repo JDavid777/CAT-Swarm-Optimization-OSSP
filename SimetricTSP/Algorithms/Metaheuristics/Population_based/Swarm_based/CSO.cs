@@ -15,6 +15,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         public List<Cat> Swarm;
 
         public const double C = 1;
+        public const double W = 1;
         public double MR = 0.4;
         public int NumberSM => (int)(MR * SwarmSize);
         public int CountSM = 0;
@@ -30,9 +31,9 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             Swarm = new List<Cat>();
         }
 
-        public override void Execute(TSP theTsp, Random theAleatory)
+        public override void Execute(OSSP theOSSP, Random theAleatory)
         {
-            MyTsp = theTsp;
+            MyOSSP = theOSSP;
             MyAleatory = theAleatory;
             CurrentEFOs = 0;
             Curve = new List<double>();
@@ -43,7 +44,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 var newCat = new Cat(this);
                 newCat.RandomInitialization();       
                 Swarm.Add(newCat);
-                if (Math.Abs(newCat.Fitness - MyTsp.OptimalKnown) < 1e-10)
+                if (Math.Abs(newCat.Fitness - MyOSSP.OptimalKnown) < 1e-10)
                     break;
             }
 
@@ -53,7 +54,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             var best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
             MyBestSolution = new Cat(best);
 
-            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyTsp.OptimalKnown) > 1e-10)
+            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyOSSP.OptimalKnown) > 1e-10)
             {
                 for (var i = 0; i < SwarmSize; i++)
                 {
@@ -80,7 +81,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         {
             for (var i = 0; i < NumberSM; i++)
             {
-                int aleatorio = MyAleatory.Next(0, SwarmSize); //Preguntar
+                int aleatorio = MyAleatory.Next(SwarmSize);
                 Swarm[aleatorio].SMFlag = true;
             }
             
@@ -101,7 +102,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
             /* Step2: For each copy, according to CDC, randomly plus or minus SRD percents 
             of the present values and replace the old ones. */
-            var size = MyTsp.TotalNodes;
+            var size = MyOSSP.NumOperations;
             var sum = CDC + SRD;
             for (var i = 0; i < (SPC ? SMP - 1 : SMP); i++)
             {
@@ -110,25 +111,25 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                     var index = SRD - 1;
                     for (var j = CDC; j > SRD; j--)
                     {
-                        var aux = cat.Tour[j];
-                        cat.Tour[j] = cat.Tour[index];
-                        cat.Tour[index] = aux;
+                        var aux = cat.Position[j];
+                        cat.Position[j] = cat.Position[index];
+                        cat.Position[index] = aux;
                         index++;
                     }
                 }
                 else
                 {
-                    var first = cat.Tour[SRD - 1];
+                    var first = cat.Position[SRD - 1];
 
                     if (sum < size)
                     {
-                        cat.Tour[SRD - 1] = cat.Tour[sum];
-                        cat.Tour[sum] = first;
+                        cat.Position[SRD - 1] = cat.Position[sum];
+                        cat.Position[sum] = first;
                     }
                     else
                     {
-                        cat.Tour[SRD - 1] = cat.Tour[sum - (size + 1)];
-                        cat.Tour[sum - (size + 1)] = first;
+                        cat.Position[SRD - 1] = cat.Position[sum - (size + 1)];
+                        cat.Position[sum - (size + 1)] = first;
                     }
                 }
                 
