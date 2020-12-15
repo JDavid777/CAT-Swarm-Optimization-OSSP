@@ -3,13 +3,15 @@ using System.Configuration;
 using TspLibNet;
 using TspLibNet.Tours;
 using TspLibNet.TSP;
+using System.Collections.Generic;
+using System;
 
 namespace SimetricTSP.Problems
 {
     public class OSSP
     {
-        private const string RootDirectory = "C:\\Users\\jmfer\\Documents\\2020-1\\METAHEURISTICAS\\CÓDIGO\\CAT-Swarm-Optimization-OSSP\\SimetricTSP\\Dataset\\";
-
+     //   private const string RootDirectory = "C:\\Users\\jmfer\\Documents\\2020-1\\METAHEURISTICAS\\CÓDIGO\\CAT-Swarm-Optimization-OSSP\\SimetricTSP\\Dataset\\";
+      //  private const string RootDirectory = "C:\\Users\\jdavi\\Downloads\\CAT-Swarm-Optimization-OSSP-main\\SimetricTSP\\Dataset\\";
         public string FileName;
         public double OptimalKnown;
         public int N;
@@ -18,14 +20,27 @@ namespace SimetricTSP.Problems
         public int[,] Times;
         public int[,] Machines;
 
-        
-        public OSSP(string fileName)
-        {
-            if (fileName == null) fileName = "OpenShop1_4x4.txt";
+        private Machine[] MachineList;
 
-           // var rootDirectory = ConfigurationManager.AppSettings["RootDirectory"];
-            FileName = RootDirectory + fileName;
-            ReadFile();
+
+        public OSSP(string fileName= "OpenShop1_4x4.txt")
+        {
+            // var rootDirectory = ConfigurationManager.AppSettings["RootDirectory"];
+            // FileName = RootDirectory + fileName;
+            //ReadFile();
+            int [,] matrix = {
+                { 1,2,3,4,5,6,7,8,9 }, 
+                { 1,1,1,2,2,2,3,3,3 },
+                { 3,1,2,1,3,2,1,2,3 }, 
+                { 2,3,5,5,7,1,4,5,1 }
+            };
+            this.N = 3;
+            this.InfoMatrix = matrix;
+            this.FormatMatrix();
+         
+            this.MachineList = new Machine[this.N];
+            this.CreateMachine();
+            this.ToAssign();
 
             
         }
@@ -100,20 +115,120 @@ namespace SimetricTSP.Problems
             }
         }
 
-        public double Evaluate(int[] dim)
+        /// <summary>
+        /// Asigna las operaciones, los jobs, y los tiempos correspondientes a cada maquina
+        /// </summary>
+        private void ToAssign()
         {
-            var summ = 0.0;
-            /*for (var i = 0; i < TotalNodes; i++)
+            for (int j = 0; j< this.N*this.N; j++)
             {
-                var first = TheProblem.NodeProvider.GetNode(dim[i] + 1);
-                int j;
-                if (i < TotalNodes - 1) j = i + 1;
-                else j = 0;
-                var second = TheProblem.NodeProvider.GetNode(dim[j] + 1);
-                summ += TheProblem.EdgeWeightsProvider.GetWeight(first, second);
+
+                int id = this.InfoMatrix[0,j];
+                int job = this.InfoMatrix[1, j];
+                int machine = this.InfoMatrix[2, j];
+                int time = this.InfoMatrix[3, j];
+
+                Operation op = new Operation(id, job, time);
+                this.MachineList[machine].AddOperation(op);
+             
             }
-            */
-            return summ;
+        }
+        /// <summary>
+        /// Crea N maquinas vacias
+        /// </summary>
+        private void CreateMachine()
+        {
+            for (int i = 0; i < this.N; i++)
+            {
+                Machine mc = new Machine();
+                this.MachineList[i] = mc;
+            }
+        }
+        /// <summary>
+        /// Realiza la evaluación de una solución
+        /// </summary>
+        /// <param name="dim">Vector solución de tamaño N * N</param>
+        /// <returns></returns>
+        public int Evaluate(int[] dim)
+        {
+            int[] makespanList = this.RunMachines(dim);
+            int maxValue = 0;
+            foreach (var makespan in makespanList)
+            {
+                if (makespan>maxValue) maxValue = makespan;
+            }
+            return maxValue;
+        }
+
+        /// <summary>
+        /// Simula la ejecución de las operaciones en cada maquina
+        /// </summary>
+        /// <param name="dim">Listado de operaciones en el orden a ejecutar</param>
+        /// <returns></returns>
+        private int[] RunMachines(int[] dim){
+
+            int opId, jobIdx, newMakespan;
+            //Representa la relación time/job donde i = job; elemento en i = tiempo acumulado
+            int[] timeJob = new int[this.N];
+
+            //Se inicializa en ceros el tiempo de los jobs
+            for (int i = 0; i < timeJob.Length; i++)   timeJob[i] = 0;    
+
+            //Ejecución de las operaciones
+            for (int i = 0; i < dim.Length; i++){
+                opId = dim[i]-1; //Obtener el elemento en i de la solución
+                //Se busca la maquina encargada de la operación 
+                int mcIdx=this.FindMachine(opId);
+                //Se obtiene la maquina que responsable de la operación (opId)
+                Machine mc = this.MachineList[mcIdx];
+                //Se obtiene el job asociado a la operación actual y a la maquina actual
+                jobIdx = mc.GetOperation(opId).Job;
+                if (mc.Makespan >= timeJob[jobIdx]){
+                    //Se actualiza el tiempo de la maquina actual
+                    newMakespan = this.MachineList[mcIdx].Makespan + mc.GetOperation(opId).Time;
+                    this.MachineList[mcIdx].Makespan = newMakespan;
+                }else{
+                    newMakespan = timeJob[jobIdx] + mc.GetOperation(opId).Time;
+                    this.MachineList[mcIdx].Makespan = newMakespan;
+                }
+                //Se actualiza el tiempo acumulado para el job actual
+                timeJob[jobIdx] = newMakespan;
+            }
+            //Se retorna la lista de tiempos acumulados por job.
+            return timeJob;
+        }
+
+        /// <summary>
+        /// Le cambia el formato a la matrix de información para hacer uso de indices informaticos
+        /// </summary>
+        private void FormatMatrix()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < N*N; j++)
+                {
+                    this.InfoMatrix[i, j] = this.InfoMatrix[i, j] - 1;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Busca la maquina que tiene asignada la operación
+        /// </summary>
+        /// <param name="opId">Identificador de la operación</param>
+        /// <returns></returns>
+        private int FindMachine(int opId)
+        {
+            for (int i = 0; i < this.MachineList.Length; i++)
+            {
+                
+                if (this.MachineList[i].Contains(opId))
+                {
+                    return i;
+                }
+            }
+            return -1;
+
         }
 
         public override string ToString()

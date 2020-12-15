@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using SimetricTSP.Algorithms;
 using SimetricTSP.Algorithms.Metaheuristics.Population_based.GeneticAlgorithms;
-using SimetricTSP.Algorithms.Metaheuristics.Population_based.HarmonySearchAlgorithms;
+//using SimetricTSP.Algorithms.Metaheuristics.Population_based.HarmonySearchAlgorithms;
 using SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based;
-using SimetricTSP.Algorithms.Metaheuristics.SimpleState;
+//using SimetricTSP.Algorithms.Metaheuristics.SimpleState;
 using SimetricTSP.Problems;
 
 namespace BinaryKnapsack
@@ -14,7 +14,9 @@ namespace BinaryKnapsack
     {
         static void Main()
         {
-            OSSP newTest = new OSSP("OpenShop8_10x10.txt");
+            OSSP newTest = new OSSP();
+            int[] x = { 2, 3, 6, 5, 7, 4, 1, 9, 8 };
+            Console.WriteLine(newTest.Evaluate(x));
             Console.ReadKey();
 
             //var myExhaustiveTest = new ExhaustiveTest();

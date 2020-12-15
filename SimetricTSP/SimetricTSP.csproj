@@ -54,6 +54,8 @@
     <Compile Include="Algorithms\Metaheuristics\Population_based\Swarm_based\PSOSolution.cs" />
     <Compile Include="Algorithms\Metaheuristics\Metaheuristic.cs" />
     <Compile Include="Algorithms\Solution.cs" />
+    <Compile Include="Problems\Machine.cs" />
+    <Compile Include="Problems\Operation.cs" />
     <Compile Include="Problems\OSSP.cs" />
     <Compile Include="Problems\TSP.cs" />
     <Compile Include="Program.cs" />
