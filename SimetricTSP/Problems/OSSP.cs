@@ -10,12 +10,12 @@ namespace SimetricTSP.Problems
 {
     public class OSSP
     {
-     //   private const string RootDirectory = "C:\\Users\\jmfer\\Documents\\2020-1\\METAHEURISTICAS\\CÓDIGO\\CAT-Swarm-Optimization-OSSP\\SimetricTSP\\Dataset\\";
+        private const string RootDirectory = "C:\\Users\\jmfer\\Documents\\2020-1\\METAHEURISTICAS\\CÓDIGO\\CAT-Swarm-Optimization-OSSP\\SimetricTSP\\Dataset\\";
       //  private const string RootDirectory = "C:\\Users\\jdavi\\Downloads\\CAT-Swarm-Optimization-OSSP-main\\SimetricTSP\\Dataset\\";
         public string FileName;
         public double OptimalKnown;
         public int N;
-        public int NumOperations;
+        public int NumOperations => N * N;
         public int[,] InfoMatrix;
         public int[,] Times;
         public int[,] Machines;
@@ -23,35 +23,33 @@ namespace SimetricTSP.Problems
         private Machine[] MachineList;
 
 
-        public OSSP(string fileName= "OpenShop1_4x4.txt")
+        public OSSP(string fileName= "OpenShop1_4x4")
         {
             // var rootDirectory = ConfigurationManager.AppSettings["RootDirectory"];
-            // FileName = RootDirectory + fileName;
-            //ReadFile();
-            int [,] matrix = {
-                { 1,2,3,4,5,6,7,8,9 }, 
+            FileName = fileName;
+            //ReadFile(RootDirectory + fileName + ".txt");
+            int[,] matrix = {
+                { 1,2,3,4,5,6,7,8,9 },
                 { 1,1,1,2,2,2,3,3,3 },
-                { 3,1,2,1,3,2,1,2,3 }, 
+                { 3,1,2,1,3,2,1,2,3 },
                 { 2,3,5,5,7,1,4,5,1 }
             };
             this.N = 3;
             this.InfoMatrix = matrix;
+            this.OptimalKnown = 13;
+            //this.FillInfoMatrix();
             this.FormatMatrix();
-         
             this.MachineList = new Machine[this.N];
             this.CreateMachine();
             this.ToAssign();
-
-            
         }
-        public void ReadFile()
+        public void ReadFile(String path)
         {
             //read the problem
-            var lines = File.ReadAllLines(FileName);
+            var lines = File.ReadAllLines(path);
             var firstline = lines[0].Split(' ');
             var secondline = lines[1];
             N = int.Parse(firstline[0]);
-            NumOperations = N * N;
             OptimalKnown = double.Parse(secondline);
             
             Times = new int[N,N];
@@ -73,8 +71,6 @@ namespace SimetricTSP.Problems
                 indexTime++;
                 indexMachines++;
             }
-
-            FillInfoMatrix();
         }
 
         public void FillInfoMatrix()
@@ -157,7 +153,16 @@ namespace SimetricTSP.Problems
             {
                 if (makespan>maxValue) maxValue = makespan;
             }
+            CleanMachines();
             return maxValue;
+        }
+
+        public void CleanMachines()
+        {
+            foreach (var item in this.MachineList)
+            {
+                item.Makespan = 0;
+            }
         }
 
         /// <summary>

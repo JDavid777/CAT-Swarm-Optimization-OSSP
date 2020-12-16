@@ -14,41 +14,37 @@ namespace BinaryKnapsack
     {
         static void Main()
         {
-            OSSP newTest = new OSSP();
-            int[] x = { 2, 3, 6, 5, 7, 4, 1, 9, 8 };
-            Console.WriteLine(newTest.Evaluate(x));
-            Console.ReadKey();
 
             //var myExhaustiveTest = new ExhaustiveTest();
             //myExhaustiveTest.Execute();
 
-            /*const int maxEFOs = 1000;
+            const int maxEFOs = 1000;
             const int maximasRepeticiones = 30;
 
-            var problemsList = new List<TSP>
+            var problemsList = new List<OSSP>
             {
-                new TSP("bayg29"),
-                new TSP("bays29")
+                new OSSP()
             };
 
             var mhList = new List<Algorithm>()
             {
-                new HillClimbing(maxEFOs){NumerOfTweak = 1},
-                new HillClimbing(maxEFOs){NumerOfTweak = 2},
-                new GBHS(maxEFOs){HMS = 5, HMCR = 0.7, PAR = 0.25},
-                new GBHS(maxEFOs){HMS = 5, HMCR = 0.7, PAR = 0.25, LocalOptimizer = 30},
-                //new RandomSearch(maxEFOs),
+                //new HillClimbing(maxEFOs){NumerOfTweak = 1},
+                //new HillClimbing(maxEFOs){NumerOfTweak = 2},
+                //new GBHS(maxEFOs){HMS = 5, HMCR = 0.7, PAR = 0.25},
+                //new GBHS(maxEFOs){HMS = 5, HMCR = 0.7, PAR = 0.25, LocalOptimizer = 30},
+                ////new RandomSearch(maxEFOs),
                 //new GA(maxEFOs),
                 //new PSO(maxEFOs)
+                new CSO(maxEFOs)
             };
 
             foreach (var myMetaHeuristic in mhList)
             {
-                Console.WriteLine($"{"Problem",-15} {"Items",6} {"Best",12}   {myMetaHeuristic}");
+                Console.WriteLine($"{"Problem",-15} {"Items",6} {"Best",12} {myMetaHeuristic, 7}");
 
                 foreach (var myProblem in problemsList)
                 {
-                    Console.Write($"{myProblem.FileName,-15} {myProblem.TotalNodes,6} {myProblem.OptimalKnown,12:0.###} ");
+                    Console.Write($"{myProblem.FileName,-15} {myProblem.NumOperations,6} {myProblem.OptimalKnown,12:0.###} ");
                     var listFitness = new List<double>();
                     var listEFOs = new List<double>();
                     var listTimes = new List<double>();
@@ -77,7 +73,7 @@ namespace BinaryKnapsack
                 }
                 Console.WriteLine();
             }
-            Console.ReadKey();*/
+            Console.ReadKey();
         }
     }
 }

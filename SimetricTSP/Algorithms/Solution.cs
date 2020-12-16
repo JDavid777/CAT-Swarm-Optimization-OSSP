@@ -32,10 +32,10 @@ namespace SimetricTSP.Algorithms
             var aleatories = new List<int>();
             var aleatory = -1;
             for (var i = 0; i < MyContainer.MyOSSP.NumOperations; i++)
-            { 
-                while (aleatories.Contains(aleatory))
+            {
+                do
                     aleatory = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations) + 1;
-
+                while (aleatories.Contains(aleatory));
                 aleatories.Add(aleatory);
                 Position[i] = aleatory;
             }
@@ -50,7 +50,6 @@ namespace SimetricTSP.Algorithms
                 availableCities.RemoveAt(pos);
             }*/
 
-            Evaluate();
         }
         
         public void Tweak()

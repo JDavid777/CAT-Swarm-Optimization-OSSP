@@ -8,15 +8,15 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
     public class CSO: Metaheuristic
     {
         public int SwarmSize = 50;
-        public int SMP; //Seeking Memory Pool
+        public int SMP = 5; //Seeking Memory Pool
         public int SRD; //Seeking range
-        public int CDC; //counts of dimension to change
+        public double CDC = 0.8; //counts of dimension to change
         public bool SPC; //Self-position considerate
         public List<Cat> Swarm;
 
-        public const double C = 1;
-        public const double W = 1;
-        public double MR = 0.4;
+        public const double C = 2.05;
+        public const double W = 0.7;
+        public double MR = 0.3;
         public int NumberSM => (int)(MR * SwarmSize);
         public int CountSM = 0;
 
@@ -58,7 +58,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             {
                 for (var i = 0; i < SwarmSize; i++)
                 {
-                    if (Swarm[i].SMFlag)
+                    if (Swarm[i].TMFlag)
                         Swarm[i] = new Cat(SeekingMode(Swarm[i]));
                     else
                         Swarm[i] = new Cat(TracingMode(Swarm[i]));
@@ -82,7 +82,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             for (var i = 0; i < NumberSM; i++)
             {
                 int aleatorio = MyAleatory.Next(SwarmSize);
-                Swarm[aleatorio].SMFlag = true;
+                Swarm[aleatorio].TMFlag = true;
             }
             
         }
@@ -91,6 +91,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
             var clones = new List<Cat>();
             var probabilites = new List<double>();
+            
             /*Step1: Make j copies of the present position of catk, where j = SMP. 
             If the value of SPC is true, let j = (SMP-1) then retain the present position as one of the candidates.*/ 
             
@@ -103,13 +104,16 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             /* Step2: For each copy, according to CDC, randomly plus or minus SRD percents 
             of the present values and replace the old ones. */
             var size = MyOSSP.NumOperations;
-            var sum = CDC + SRD;
+            var mutationLenght = (int) Math.Round(CDC * size);
+            
             for (var i = 0; i < (SPC ? SMP - 1 : SMP); i++)
             {
+                SRD = MyAleatory.Next(size) + 1;
+                var sum = mutationLenght + SRD;
                 if (sum == size)
                 {
                     var index = SRD - 1;
-                    for (var j = CDC; j > SRD; j--)
+                    for (var j = mutationLenght; j > SRD; j--)
                     {
                         var aux = cat.Position[j];
                         cat.Position[j] = cat.Position[index];
@@ -132,8 +136,10 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                         cat.Position[sum - (size + 1)] = first;
                     }
                 }
-                
-                clones.Add(new Cat(cat));
+
+                cat.Evaluate();
+                clones.RemoveAt(i);
+                clones.Insert(i, new Cat(cat));
             }
 
             /*Step3: Calculate the fitness values (FS) of all candidate points.*/
@@ -230,5 +236,11 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                     MyBestSolution = new PSOSolution(best);
             }
         }*/
+
+        
+        public override String ToString()
+        {
+            return "CSO";
+        }
     }
 }

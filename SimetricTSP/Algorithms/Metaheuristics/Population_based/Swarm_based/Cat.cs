@@ -8,7 +8,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         public List<(int, int)> Velocity;
         public int[] BestPosition;
         public double BestFitness;
-        public bool SMFlag;
+        public bool TMFlag;
 
         public int VelocityRange;
         public Cat(Algorithm dueño) : base(dueño)
@@ -19,7 +19,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
         public Cat(Cat original) : base(original)
         {
-
+            Velocity = new List<(int, int)>();
             foreach (var item in original.Velocity)
             {
                 Velocity.Add(item);
@@ -28,13 +28,13 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             for (var d = 0; d < MyContainer.MyOSSP.NumOperations; d++)
                 BestPosition[d] = original.BestPosition[d];
             BestFitness = original.BestFitness;
-            SMFlag = original.SMFlag;
+            TMFlag = original.TMFlag;
         }
 
         public new void RandomInitialization()
         {
-            // --
-           
+            base.RandomInitialization();
+
             BestPosition = new int[MyContainer.MyOSSP.NumOperations];
             for (var d = 0; d < MyContainer.MyOSSP.NumOperations; d++)
                 BestPosition[d] = Position[d];
@@ -52,10 +52,10 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 int pos1;
                 do
                 {
-                    pos1 = MyContainer.MyAleatory.Next(1, MyContainer.MyOSSP.NumOperations + 1);
+                    pos1 = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations) + 1;
                     pos2 = pos1;
                     while (pos2 == pos1)
-                        pos2 = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations);
+                        pos2 = MyContainer.MyAleatory.Next(MyContainer.MyOSSP.NumOperations) + 1;
                 } while (Velocity.Contains((pos1, pos2)) || Velocity.Contains((pos2, pos1)));
 
                 Velocity.Add((pos1, pos2));
