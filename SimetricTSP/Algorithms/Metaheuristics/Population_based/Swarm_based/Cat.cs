@@ -40,12 +40,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 BestPosition[d] = Position[d];
             BestFitness = Fitness;
 
-            /*Velocity = new double[MyContainer.MyTsp.TotalNodes];
-            for (var d = 0; d < MyContainer.MyTsp.TotalNodes; d++)
-                Velocity[d] = -4 + 8 * MyContainer.MyAleatory.NextDouble();*/
-
             VelocityRange = MyContainer.MyOSSP.N;
-            
             for (var i = 0; i < VelocityRange; i++)
             {
                 int pos2;
@@ -65,26 +60,20 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         }
 
         public void UpdateVelocity()
-        {
-            
+        { 
             var r = MyContainer.MyAleatory.NextDouble();
             var c = CSO.C;
             var w = CSO.W;
-
             Velocity = SumVelocities(MultiplicationReal(Velocity, w), 
                                      MultiplicationReal(
                                          PositionMinusPosition(BestPosition, Position), 
                                          r * c));
-            
         }
 
         public void UpdatePosition()
         { 
-
             Position = PositionPlusVelocity(Position, Velocity);
-
             Evaluate();
-
         }
 
         public void Repare(List<int> selected, ref double myWeight)
@@ -157,31 +146,34 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         {
             List<(int, int)> newVelocity = new List<(int, int)>();
             if (r == 0)
-                return null;
+                return newVelocity;
 
-            if((r > 0) && (r <= 1))
+            if ((r > 0) && (r <= 1))
             {
-                int newSize = (int) Math.Round(r * velocity.Count);
-                for (int i = 0; i < newSize; i++)
-                {
-                    newVelocity.Add(velocity[i]);
-                }
-
+                newVelocity = CaseMinZero(velocity, r);
             }
             else
             {
                 int intPart = (int)r;
                 double decPart = r - intPart;
-
+                List<(int, int)> subVelocity = new List<(int, int)>();
                 for (int i = 0; i < intPart; i++)
-                {
-                    //hacer suma
-                }
-                //hacer suma de la suma + decPart * velocity
-            }
-            
-            return newVelocity;
+                    subVelocity = SumVelocities(subVelocity, velocity);
 
+                newVelocity = SumVelocities(subVelocity, CaseMinZero(velocity, decPart));
+            }
+            return newVelocity;
+        }
+
+        public List<(int, int)> CaseMinZero(List<(int, int)> velocity, double r)
+        {
+            List<(int, int)> newVelocity = new List<(int, int)>();
+            int newSize = (int)Math.Round(r * velocity.Count);
+            for (int i = 0; i < newSize; i++)
+            {
+                newVelocity.Add(velocity[i]);
+            }
+            return newVelocity;
         }
 
     }

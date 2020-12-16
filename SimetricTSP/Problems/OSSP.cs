@@ -27,17 +27,17 @@ namespace SimetricTSP.Problems
         {
             // var rootDirectory = ConfigurationManager.AppSettings["RootDirectory"];
             FileName = fileName;
-            //ReadFile(RootDirectory + fileName + ".txt");
-            int[,] matrix = {
-                { 1,2,3,4,5,6,7,8,9 },
-                { 1,1,1,2,2,2,3,3,3 },
-                { 3,1,2,1,3,2,1,2,3 },
-                { 2,3,5,5,7,1,4,5,1 }
-            };
-            this.N = 3;
-            this.InfoMatrix = matrix;
-            this.OptimalKnown = 13;
-            //this.FillInfoMatrix();
+            ReadFile(RootDirectory + fileName + ".txt");
+            //int[,] matrix = {
+            //    { 1,2,3,4,5,6,7,8,9 },
+            //    { 1,1,1,2,2,2,3,3,3 },
+            //    { 3,1,2,1,3,2,1,2,3 },
+            //    { 2,3,5,5,7,1,4,5,1 }
+            //};
+            //this.N = 3;
+            //this.InfoMatrix = matrix;
+            //this.OptimalKnown = 13;
+            this.FillInfoMatrix();
             this.FormatMatrix();
             this.MachineList = new Machine[this.N];
             this.CreateMachine();
@@ -116,7 +116,7 @@ namespace SimetricTSP.Problems
         /// </summary>
         private void ToAssign()
         {
-            for (int j = 0; j< this.N*this.N; j++)
+            for (int j = 0; j< this.NumOperations; j++)
             {
 
                 int id = this.InfoMatrix[0,j];

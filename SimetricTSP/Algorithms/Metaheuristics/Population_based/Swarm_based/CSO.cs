@@ -17,13 +17,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
         public const double C = 2.05;
         public const double W = 0.7;
         public double MR = 0.3;
-        public int NumberSM => (int)(MR * SwarmSize);
-        public int CountSM = 0;
-
-        /*public double W = 1; // alpha - momentum
-        public double C1 = 1; // beta - cognitive component
-        public double C2 = 1; // delta - social component
-        public double E = 1; // epsilon (velocity consideration)*/
+        public int NumberTM => (int)(MR * SwarmSize);
 
         public CSO(int maxEFOs)
         {
@@ -38,7 +32,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             CurrentEFOs = 0;
             Curve = new List<double>();
 
-            
+            /*Generar e inicializar gatos*/
             for (var i = 0; i < SwarmSize; i++)
             {
                 var newCat = new Cat(this);
@@ -47,9 +41,9 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 if (Math.Abs(newCat.Fitness - MyOSSP.OptimalKnown) < 1e-10)
                     break;
             }
-
             DistributeCats();
 
+            /*Escoger el mejor del enjambre*/
             var maxFitness = Swarm.Min(x => x.Fitness);
             var best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
             MyBestSolution = new Cat(best);
@@ -58,7 +52,7 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
             {
                 for (var i = 0; i < SwarmSize; i++)
                 {
-                    if (Swarm[i].TMFlag)
+                    if (!Swarm[i].TMFlag)
                         Swarm[i] = new Cat(SeekingMode(Swarm[i]));
                     else
                         Swarm[i] = new Cat(TracingMode(Swarm[i]));
@@ -66,46 +60,86 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
 
                 /*Actualizar el mejor*/
                 maxFitness = Swarm.Min(x => x.Fitness);
-                best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10); //TODO: Recordar
+                best = Swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10); 
                 if (maxFitness > MyBestSolution.Fitness)
                     MyBestSolution = new Cat(best);
 
                 /*Redistribuir los gatos*/
                 DistributeCats();
-
             }
-            
-
         }
         public void DistributeCats()
         {
-            for (var i = 0; i < NumberSM; i++)
+            List<int> aleatories = new List<int>();
+            int aleatorio;
+            for (int i = 0; i < SwarmSize; i++)
+                Swarm[i].TMFlag = false;
+
+            for (var i = 0; i < NumberTM; i++)
             {
-                int aleatorio = MyAleatory.Next(SwarmSize);
+                do
+                    aleatorio = MyAleatory.Next(SwarmSize);
+                while (aleatories.Contains(aleatorio));
+                aleatories.Add(aleatorio);
                 Swarm[aleatorio].TMFlag = true;
             }
-            
         }
+
         public Cat SeekingMode(Cat cat)
         {
-
             var clones = new List<Cat>();
-            var probabilites = new List<double>();
-            
             /*Step1: Make j copies of the present position of catk, where j = SMP. 
-            If the value of SPC is true, let j = (SMP-1) then retain the present position as one of the candidates.*/ 
+            If the value of SPC is true, let j = (SMP-1) then retain the present 
+            position as one of the candidates.*/ 
             
             //Se preserva el actual en la última posición
             for (var i = 0; i < SMP; i++)
-            {
                 clones.Add(new Cat(cat));
-            }
 
             /* Step2: For each copy, according to CDC, randomly plus or minus SRD percents 
             of the present values and replace the old ones. */
-            var size = MyOSSP.NumOperations;
-            var mutationLenght = (int) Math.Round(CDC * size);
+            clones = Mutate(clones, cat);
+
+            /*Step3: Calculate the fitness values (FS) of all candidate points.*/
+            for (int i = 0; i < SMP; i++)
+                clones[i].Evaluate();
+
+            /* Step4: If all FS are not exactly equal, calculate the selecting probability 
+            of each candidate point by equation (1), otherwise set all the selecting probability 
+            of each candidate point be 1.*/
+            var equal = CheckFitnessEquals(clones);
+            var probabilites = GetProbabilites(clones, equal);
+
+            /*Step5: Randomly pick the point to move to from the candidate points, 
+             * and replace the position of catk*/
+            var chosen = SelectPosition(probabilites, clones, equal);
+
+            /*Update the best position found by the cat*/
+            var minFitness = clones.Min(x => x.Fitness);
+            var bestFound = clones.Find(x => Math.Abs(x.Fitness - minFitness) < 1e-10);
+            clones[chosen].BestPosition = bestFound.Position;
+            clones[chosen].BestFitness = bestFound.Fitness;
+
+            return clones[chosen];
+        }
+        public Cat TracingMode(Cat cat)
+        {
+            /** The process of TM is given as:
+            (1) Update the velocities of each catk According to the equation:
+                V′k=w∗Vk+r∗c∗(Xbest−Xk)
+            (2) check if the velocities are of the highest order.
+            (3) update the position of the catk according to equation: X′k=Xk+Vk**/
+            cat.UpdateVelocity();
+            cat.UpdatePosition();
             
+            return cat;
+        }
+
+        public List<Cat> Mutate(List<Cat> clones, Cat cat)
+        {
+            var size = MyOSSP.NumOperations;
+            var mutationLenght = (int)Math.Round(CDC * size);
+
             for (var i = 0; i < (SPC ? SMP - 1 : SMP); i++)
             {
                 SRD = MyAleatory.Next(size) + 1;
@@ -141,103 +175,74 @@ namespace SimetricTSP.Algorithms.Metaheuristics.Population_based.Swarm_based
                 clones.RemoveAt(i);
                 clones.Insert(i, new Cat(cat));
             }
+            return clones;
+        }
 
-            /*Step3: Calculate the fitness values (FS) of all candidate points.*/
-            for (int i = 0; i < clones.Count(); i++)
-            {
-                clones[i].Evaluate();
-            }
-
-            /* Step4: If all FS are not exactly equal, calculate the selecting probability 
-            of each candidate point by equation (1), otherwise set all the selecting probability 
-            of each candidate point be 1.*/
+        public List<double> GetProbabilites(List<Cat> clones, bool equal)
+        {
+            var probabilites = new List<double>();
             var max_fitness = Swarm.Max(x => x.Fitness);
             var min_fitness = Swarm.Min(x => x.Fitness);
             var probability = 0.0;
-            for (int i = 0; i < clones.Count(); i++)
-            {
-                probability = Math.Abs(clones[i].Fitness - min_fitness) /
-                              (max_fitness - min_fitness);
-                probabilites.Add(probability);
-            }
             
-            /*Step5: Randomly pick the point to move to from the candidate points, and replace the position of catk*/
-            var aleatory = MyAleatory.NextDouble();
+            if (equal)
+            {
+                for (int i = 0; i < SMP; i++)
+                    probabilites.Add(1);
+            }
+            else
+            {
+                for (int i = 0; i < SMP; i++)
+                {
+                    probability = Math.Abs(clones[i].Fitness - max_fitness) / 
+                                          (max_fitness - min_fitness);
+                    probabilites.Add(probability);
+                }
+            }
+            return probabilites;
+        }
+
+        public bool CheckFitnessEquals(List<Cat> clones)
+        {
+            var equal = false;
+            for (int i = 0; i < SMP; i++)
+            {
+                for (int j = i + 1; j < SMP; i++)
+                {
+                    if (clones[i].Fitness == clones[j].Fitness)
+                    {
+                        equal = true;
+                        break;
+                    }
+                }
+            }
+            return equal;
+        }
+
+        public int SelectPosition(List<double> probabilities, List<Cat> clones, bool equal)
+        {
+            
+            if (equal)
+                return MyAleatory.Next(SMP);
+
             var chosen = -1;
+            var aleatory = MyAleatory.NextDouble() * 
+                           (probabilities.Max() - probabilities.Min()) 
+                           + probabilities.Min();
             for (int i = 0; i < clones.Count(); i++)
             {
-                if (probabilites[i] > aleatory)
+                if (probabilities[i] >= aleatory)
                 {
                     chosen = i;
                     break;
                 }
-                
+
             }
-                
-            return clones[chosen];
+            return chosen;
         }
-        public Cat TracingMode(Cat cat)
-        {
-            /**
-             * The process of TM is given as:
-            (1)
-            Update the velocities of each catk According to the equation:
-            V′k=w∗Vk+r∗c∗(Xbest−Xk)
-            (2)
-            check if the velocities are of the highest order.
-            (3)
-            update the position of the catk according to equation:
-            X′k=Xk+
-             * **/
-
-            cat.UpdateVelocity();
-            cat.UpdatePosition();
-            //TODO
-            //VELOCIDADES = PSO (OSSP)
-            return cat;
-        }
-
-        /*public override void Execute(TSP theTsp, Random theAleatory)
-        {
-            MyTsp = theTsp;
-            MyAleatory= theAleatory;
-            CurrentEFOs = 0;
-            Curve = new List<double>();
-
-            var swarm = new List<PSOSolution>();
-            for (var i = 0; i < SwarmSize; i++)
-            {
-                var newParticle = new PSOSolution(this);
-                newParticle.RandomInitialization();
-                swarm.Add(newParticle);
-                if (Math.Abs(newParticle.Fitness - MyTsp.OptimalKnown) < 1e-10)
-                    break;
-            }
-
-            var maxFitness = swarm.Min(x => x.Fitness);
-            var best = swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
-            MyBestSolution = new PSOSolution(best);
-
-            while (CurrentEFOs < MaxEFOs && Math.Abs(MyBestSolution.Fitness - MyTsp.OptimalKnown) > 1e-10)
-            {
-                for (var i = 0; i < SwarmSize; i++)
-                    swarm[i].UpdateVelocity((PSOSolution)MyBestSolution);
-
-                for (var i = 0; i < SwarmSize; i++)
-                {
-                    swarm[i].UpdatePosition();
-                    if (Math.Abs(swarm[i].Fitness - MyTsp.OptimalKnown) < 1e-10)
-                        break;
-                }
-
-                maxFitness = swarm.Min(x => x.Fitness);
-                best = swarm.Find(x => Math.Abs(x.Fitness - maxFitness) < 1e-10);
-                if (maxFitness > MyBestSolution.Fitness)
-                    MyBestSolution = new PSOSolution(best);
-            }
-        }*/
-
         
+
+
         public override String ToString()
         {
             return "CSO";
